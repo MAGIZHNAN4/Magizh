@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lab Vault v2</title>
+<style>
+:root{
+  --bg:#f6f7fb;--card:#ffffff;--text:#172033;--muted:#6b7280;
+  --navy:#111827;--accent:#6d5dfc;--accent2:#8b5cf6;
+  --border:#e5e7eb;--danger:#dc2626;--ok:#059669;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea,select{font:inherit}
+header{background:var(--navy);color:#fff;padding:18px 22px;position:sticky;top:0;z-index:10}
+.topbar{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{font-weight:800;font-size:1.25rem}.brand span{color:#c4b5fd}
+header button{border:0;background:#fff;color:#111827;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+main{max-width:1200px;margin:24px auto;padding:0 16px 40px}
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:18px}
+.heroCard,.stats{background:linear-gradient(135deg,#ede9fe,#fff);border:1px solid #ddd6fe;border-radius:18px;padding:22px}
+.hero h1{margin:0 0 8px;font-size:2rem}.hero p{margin:0;color:#5b6474}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:#fff;border-color:var(--border)}
+.stat{padding:12px;border-radius:14px;background:#f9fafb;text-align:center}
+.stat b{display:block;font-size:1.45rem}
+.toolbar{display:grid;grid-template-columns:1fr 190px auto;gap:10px;margin-bottom:16px}
+.toolbar input,.toolbar select{padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.primary{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;padding:12px 16px;border-radius:12px;font-weight:800;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(17,24,39,.04)}
+.badge{display:inline-block;background:#ede9fe;color:#5b21b6;padding:5px 9px;border-radius:999px;font-size:.78rem;font-weight:700}
+.card h3{margin:10px 0 6px}.meta{font-size:.88rem;color:var(--muted);margin-bottom:12px}
+.cardActions{display:flex;gap:8px;flex-wrap:wrap}
+.cardActions button{padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:700}
+.cardActions .danger{color:var(--danger)}
+.empty{grid-column:1/-1;text-align:center;padding:42px;color:var(--muted);background:#fff;border:1px dashed #cbd5e1;border-radius:16px}
+dialog{width:min(820px,94vw);border:0;border-radius:18px;padding:0;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(17,24,39,.58)}
+.modalHead{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modalHead h2{margin:0}.close{border:0;background:transparent;font-size:1.4rem;cursor:pointer}
+form{padding:18px 20px 20px}
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.86rem;font-weight:700;margin-bottom:6px}
+input,textarea,select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+textarea{min-height:90px;resize:vertical}
+.formActions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.secondary{border:1px solid var(--border);background:#fff;padding:11px 15px;border-radius:10px;font-weight:700;cursor:pointer}
+.preview{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:18px;display:none}
+.preview h2{margin-top:0}
+.preview img{max-width:100%;border-radius:10px;border:1px solid var(--border)}
+pre{white-space:pre-wrap;background:#0f172a;color:#e5e7eb;padding:14px;border-radius:12px;overflow:auto}
+.small{font-size:.82rem;color:var(--muted)}
+.qblock{border:1px solid var(--border);border-radius:14px;padding:14px;margin:12px 0;background:#fafafa}
+.qblock h4{margin:0 0 10px}
+.qblock textarea{margin-bottom:10px}
+.qimage-preview{margin-top:8px;max-width:220px;max-height:160px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#fff}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr}}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.formGrid{grid-template-columns:1fr}.full{grid-column:auto}.stats{grid-template-columns:repeat(3,1fr)}.hero h1{font-size:1.6rem}}
+@media print{
+  header,.hero,.toolbar,.grid,.noPrint{display:none!important}
+  body{background:#fff}
+  main{max-width:none;margin:0;padding:0}
+  .preview{display:block!important;border:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">🧪 <span>Lab Vault</span></div>
+    <button id="newBtn">+ New Experiment</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="heroCard">
+      <h1>Your complete digital lab record</h1>
+      <p>Save experiments, code, output images and results. Reopen them anytime and export when needed.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="totalCount">0</b><span class="small">Experiments</span></div>
+      <div class="stat"><b id="subjectCount">0</b><span class="small">Subjects</span></div>
+      <div class="stat"><b id="imageCount">0</b><span class="small">Outputs</span></div>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <input id="search" placeholder="Search topic, subject, experiment no...">
+    <select id="subjectFilter"><option value="">All subjects</option></select>
+    <button class="primary" id="newBtn2">+ Add Experiment</button>
+  </section>
+
+  <section class="grid" id="cards"></section>
+
+  <section class="preview" id="preview"></section>
+</main>
+
+<dialog id="editor">
+  <div class="modalHead">
+    <h2 id="modalTitle">New Experiment</h2>
+    <button class="close" id="closeDialog" type="button">✕</button>
+  </div>
+  <form id="labForm">
+    <input type="hidden" id="recordId">
+    <div class="formGrid">
+      <div><label>Register No.</label><input id="regNo" required placeholder="e.g. 23CS001"></div>
+      <div><label>Subject</label><input id="subject" required placeholder="e.g. Data Structures"></div>
+      <div><label>Experiment No.</label><input id="expNo" required placeholder="e.g. 7"></div>
+      <div><label>Date</label><input id="date" type="date" required></div>
+      <div class="full"><label>Topic / Title</label><input id="topic" required placeholder="e.g. Binary Search Tree Operations"></div>
+      <div class="full"><label>Aim</label><textarea id="aim" placeholder="Enter the aim"></textarea></div>
+      <div class="full">
+        <label>Number of Questions</label>
+        <select id="numQuestions"></select>
+      </div>
+      <div class="full" id="questionsContainer"></div>
+      <div class="full"><label>Result</label><textarea id="result" placeholder="Enter the result"></textarea></div>
+    </div>
+    <div class="formActions">
+      <button class="secondary" type="button" id="cancelBtn">Cancel</button>
+      <button class="primary" type="submit">Save Experiment</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const KEY='labVault.records.v1';
+let records=JSON.parse(localStorage.getItem(KEY)||'[]');
+let pendingImages={};
+
+const $=id=>document.getElementById(id);
+const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function save(){ localStorage.setItem(KEY,JSON.stringify(records)); render(); }
+function subjects(){ return [...new Set(records.map(r=>r.subject).filter(Boolean))].sort(); }
+
+function render(){
+  const q=$('search').value.trim().toLowerCase();
+  const f=$('subjectFilter').value;
+  const list=records.filter(r=>{
+    const hay=[r.subject,r.topic,r.expNo,r.regNo,r.aim].join(' ').toLowerCase();
+    return (!q||hay.includes(q)) && (!f||r.subject===f);
+  }).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+
+  $('cards').innerHTML=list.length ? list.map(r=>`
+    <article class="card">
+      <span class="badge">${esc(r.subject)}</span>
+      <h3>${esc(r.topic)}</h3>
+      <div class="meta">Exp ${esc(r.expNo)} • ${esc(r.date||'No date')} • ${esc(r.regNo||'')}</div>
+      <div class="cardActions">
+        <button onclick="viewRecord('${r.id}')">View</button>
+        <button onclick="editRecord('${r.id}')">Edit</button>
+        <button onclick="exportWord('${r.id}')">Word</button>
+        <button class="danger" onclick="deleteRecord('${r.id}')">Delete</button>
+      </div>
+    </article>`).join('') :
+    `<div class="empty"><b>No experiments found.</b><br><span class="small">Add your first lab record using “New Experiment”.</span></div>`;
+
+  $('totalCount').textContent=records.length;
+  $('subjectCount').textContent=subjects().length;
+  $('imageCount').textContent=records.reduce((n,r)=>n+((r.questions||[]).filter(q=>q.outputImage).length),0);
+
+  const old=$('subjectFilter').value;
+  $('subjectFilter').innerHTML='<option value="">All subjects</option>'+subjects().map(s=>`<option ${s===old?'selected':''}>${esc(s)}</option>`).join('');
+}
+
+
+function setupQuestionSelector(){
+  const sel=$('numQuestions');
+  if(sel.options.length===0){
+    for(let i=1;i<=20;i++){
+      const opt=document.createElement('option');
+      opt.value=i; opt.textContent=i;
+      sel.appendChild(opt);
+    }
+  }
+}
+
+function renderQuestionFields(count, existing=[]){
+  const c=$('questionsContainer');
+  c.innerHTML='';
+  for(let i=0;i<count;i++){
+    const q=existing[i]||{};
+    const div=document.createElement('div');
+    div.className='qblock';
+    div.innerHTML=`
+      <h4>Question ${i+1}</h4>
+      <label>Question / Problem Statement</label>
+      <textarea id="qtext_${i}" placeholder="Enter question ${i+1}">${esc(q.question||'')}</textarea>
+      <label>Program / Code</label>
+      <textarea id="qcode_${i}" style="min-height:170px" placeholder="Paste code for question ${i+1}">${esc(q.code||'')}</textarea>
+      <label>Output Screenshot</label>
+      <input id="qimage_${i}" type="file" accept="image/*">
+      <div class="small" id="qnote_${i}">${q.outputImage?'Existing image will be kept unless replaced.':''}</div>
+      ${q.outputImage?`<img class="qimage-preview" src="${q.outputImage}" alt="Question ${i+1} output">`:''}
+    `;
+    c.appendChild(div);
+    div.querySelector(`#qimage_${i}`).addEventListener('change',e=>{
+      const file=e.target.files[0];
+      if(!file) return;
+      const reader=new FileReader();
+      reader.onload=()=>{
+        pendingImages[i]=reader.result;
+        const note=$(`qnote_${i}`);
+        if(note) note.textContent='Image selected: '+file.name;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+}
+
+$('numQuestions').addEventListener('change',()=>{
+  const old=[];
+  const count=+$('numQuestions').value;
+  for(let i=0;i<count;i++){
+    old.push({
+      question:$(`qtext_${i}`)?.value||'',
+      code:$(`qcode_${i}`)?.value||'',
+      outputImage:pendingImages[i]||null
+    });
+  }
+  renderQuestionFields(count,old);
+});
+
+function openNew(){
+  $('labForm').reset(); $('recordId').value=''; pendingImages={};
+  $('modalTitle').textContent='New Experiment';
+  $('date').value=new Date().toISOString().slice(0,10);
+  setupQuestionSelector();
+  $('numQuestions').value='1';
+  renderQuestionFields(1,[]);
+  $('editor').showModal();
+}
+
+
+$('labForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const id=$('recordId').value || crypto.randomUUID();
+  const previous=records.find(r=>r.id===id);
+  const count=+$('numQuestions').value;
+  const questions=[];
+  for(let i=0;i<count;i++){
+    questions.push({
+      question:$(`qtext_${i}`).value.trim(),
+      code:$(`qcode_${i}`).value,
+      outputImage: pendingImages[i]!==undefined ? pendingImages[i] : (previous?.questions?.[i]?.outputImage||null)
+    });
+  }
+  const item={
+    id, regNo:$('regNo').value.trim(), subject:$('subject').value.trim(),
+    expNo:$('expNo').value.trim(), date:$('date').value, topic:$('topic').value.trim(),
+    aim:$('aim').value.trim(), questions,
+    result:$('result').value.trim(),
+    updatedAt:Date.now()
+  };
+  const i=records.findIndex(r=>r.id===id);
+  if(i>=0) records[i]=item; else records.push(item);
+  save(); $('editor').close(); viewRecord(id);
+});
+
+window.editRecord=id=>{
+  const r=records.find(x=>x.id===id); if(!r) return;
+  $('recordId').value=r.id; $('regNo').value=r.regNo||''; $('subject').value=r.subject||'';
+  $('expNo').value=r.expNo||''; $('date').value=r.date||''; $('topic').value=r.topic||'';
+  $('aim').value=r.aim||''; $('result').value=r.result||'';
+  pendingImages={};
+  setupQuestionSelector();
+  const qs = (r.questions && r.questions.length) ? r.questions : [{
+    question:r.question||'', code:r.code||'', outputImage:r.outputImage||null
+  }];
+  $('numQuestions').value=String(Math.min(20,Math.max(1,qs.length)));
+  renderQuestionFields(+$('numQuestions').value,qs);
+  $('modalTitle').textContent='Edit Experiment'; $('editor').showModal();
+};
+
+window.deleteRecord=id=>{
+  const r=records.find(x=>x.id===id); if(!r) return;
+  if(confirm(`Delete "${r.topic}"?`)){ records=records.filter(x=>x.id!==id); save(); $('preview').style.display='none'; }
+};
+
+function recordHtml(r){
+  const qs=(r.questions&&r.questions.length)?r.questions:[{
+    question:r.question||'',code:r.code||'',outputImage:r.outputImage||null
+  }];
+  const qhtml=qs.map((q,i)=>`
+    <section style="margin-top:22px">
+      <h3>Question ${i+1}</h3>
+      ${q.question?`<p>${esc(q.question).replace(/\n/g,'<br>')}</p>`:''}
+      ${q.code?`<h4>Program</h4><pre>${esc(q.code)}</pre>`:''}
+      ${q.outputImage?`<h4>Output</h4><img src="${q.outputImage}" alt="Output screenshot for question ${i+1}">`:''}
+    </section>
+  `).join('');
+  return `
+  <div class="noPrint" style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px">
+    <button class="secondary" onclick="window.print()">Print / PDF</button>
+    <button class="primary" onclick="exportWord('${r.id}')">Export Word</button>
+  </div>
+  <h2 style="text-align:center;margin-bottom:4px">LAB RECORD</h2>
+  <p style="text-align:center;color:#6b7280;margin-top:0">${esc(r.subject)}</p>
+  <p><b>Register No:</b> ${esc(r.regNo)} &nbsp;&nbsp; <b>Experiment No:</b> ${esc(r.expNo)} &nbsp;&nbsp; <b>Date:</b> ${esc(r.date)}</p>
+  <hr>
+  <h3>${esc(r.topic)}</h3>
+  ${r.aim?`<h4>Aim</h4><p>${esc(r.aim).replace(/\n/g,'<br>')}</p>`:''}
+  ${qhtml}
+  ${r.result?`<h4>Result</h4><p>${esc(r.result).replace(/\n/g,'<br>')}</p>`:''}
+  `;
+}
+
+window.viewRecord=id=>{
+  const r=records.find(x=>x.id===id); if(!r) return;
+  $('preview').innerHTML=recordHtml(r); $('preview').style.display='block';
+  $('preview').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.exportWord=id=>{
+  const r=records.find(x=>x.id===id); if(!r) return;
+  const html=`<!doctype html><html><head><meta charset="utf-8">
+  <style>body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.5}h2{text-align:center}img{max-width:650px}pre{white-space:pre-wrap;border:1px solid #bbb;padding:10px}</style>
+  </head><body>${recordHtml(r).replace(/<div class="noPrint"[\s\S]*?<\/div>/,'')}</body></html>`;
+  const blob=new Blob(['\ufeff',html],{type:'application/msword'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`${(r.subject||'Lab')}_Exp_${r.expNo||'Record'}.doc`; a.click(); URL.revokeObjectURL(a.href);
+};
+
+$('newBtn').onclick=openNew; $('newBtn2').onclick=openNew;
+$('closeDialog').onclick=()=>$('editor').close();
+$('cancelBtn').onclick=()=>$('editor').close();
+$('search').addEventListener('input',render);
+$('subjectFilter').addEventListener('change',render);
+
+setupQuestionSelector();
+render();
+</script>
+</body>
+</html>
